@@ -10,12 +10,3 @@
     "express": "^4.18.2"
   }
 }
-```
-
-Click **Commit changes** → **Commit changes**.
-
-**Step 2: Create `.gitignore`**
-
-Click **Add file** → **Create new file** → name it `.gitignore` → paste:
-```
-node_modules/

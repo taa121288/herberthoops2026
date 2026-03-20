@@ -187,6 +187,16 @@ async function fetchEspnScores() {
               console.log(`  ✅ Game ${gameId}: ${winnerName} wins`);
             }
           }
+          // Store final score
+          if (!data.scores) data.scores = {};
+          if (!data.scores[String(gameId)]) {
+            const score1 = c1.score || '0';
+            const score2 = c2.score || '0';
+            const name1 = ID_TO_TEAM[String(id1)] || (c1.team.abbreviation || '???');
+            const name2 = ID_TO_TEAM[String(id2)] || (c2.team.abbreviation || '???');
+            data.scores[String(gameId)] = { t1: name1, s1: parseInt(score1), t2: name2, s2: parseInt(score2) };
+            updated = true;
+          }
         } else if (gameId && isInProgress) {
           // Track live game
           const score1 = c1.score || '0';
@@ -234,7 +244,9 @@ function startAutoFetch() {
 // API ENDPOINTS
 // ──────────────────────────────────────────────
 app.get('/api/results', (req, res) => {
-  res.json(readData());
+  const data = readData();
+  if (!data.scores) data.scores = {};
+  res.json(data);
 });
 
 // Manual result entry (admin)

@@ -1,0 +1,21 @@
+{
+  "name": "herberthoops2026",
+  "version": "1.0.0",
+  "description": "Herbert Hoops 2026 - NCAA March Madness Bracket Pool",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+```
+
+Click **Commit changes** → **Commit changes**.
+
+**Step 2: Create `.gitignore`**
+
+Click **Add file** → **Create new file** → name it `.gitignore` → paste:
+```
+node_modules/

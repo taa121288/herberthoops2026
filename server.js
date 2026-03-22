@@ -127,8 +127,9 @@ async function fetchEspnScores() {
   // March Madness 2026 roughly March 19 - April 6
   const now = new Date();
   const dates = [];
-  // Check today, yesterday, and the past 3 weeks of tournament
-  for (let d = 0; d <= 21; d++) {
+  // Check past 3 weeks of tournament — oldest first so R1 results
+  // are available when matching R2+ games on the same fetch pass
+  for (let d = 21; d >= 0; d--) {
     const dt = new Date(now);
     dt.setDate(dt.getDate() - d);
     const y = dt.getFullYear();

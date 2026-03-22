@@ -516,21 +516,21 @@ function fetchData(cb){
 // SCORING
 function getEl(){var el={};FR.forEach(function(g){if(RES[g[0]]){if(RES[g[0]]===g[2])el[g[4]]=1;else el[g[2]]=1}});FD.forEach(function(g){var id=g[0];if(RES[id]){var nd=GT[id];nd.f.forEach(function(f){if(RES[f]&&RES[f]!==RES[id])el[RES[f]]=1})}});return el}
 function score(p){var el=getEl(),m=S.mode,sc=0,co=0,wr=0,al=0,st={};for(var g=1;g<=63;g++){var pk=p.p[g],ri=GR[g],bp=RP[ri],sd=TS[pk]||1,pts=m==="sb"?bp+sd:m==="sm"?bp*sd:bp;if(RES[g]){if(RES[g]===pk){sc+=pts;co++;st[g]={s:"correct",p:pts}}else{wr++;st[g]={s:"wrong",p:0}}}else if(el[pk]){wr++;st[g]={s:"eliminated",p:0}}else{al++;st[g]={s:"alive",p:pts}}}var mx=sc;for(var g2=1;g2<=63;g2++){if(st[g2]&&st[g2].s==="alive")mx+=st[g2].p}return{sc:sc,co:co,wr:wr,al:al,mx:mx,st:st}}
-function calc(){var el=getEl();ST=PP.map(function(p,i){var r=score(p);
-  // E8 teams left = unique teams this player picked to WIN their way into the Elite 8
-  // That means: teams picked in E8 games (57-60) as participants = S16 winners
-  // These are the teams they believe will make the Elite 8
-  // Count how many of those teams are still alive (not eliminated)
+
+// PROJECTION — based on bracket health (your accuracy × your alive picks)
+// PROJ = current pts + alive pts × (correct / games decided)
+function calc(){var el=getEl();
+  var decided=Object.keys(RES).length;
+  ST=PP.map(function(p,i){var r=score(p);
+  var hitRate=decided>0?r.co/decided:0.5;
+  var alivePts=r.mx-r.sc;
+  var proj=Math.round(r.sc+alivePts*hitRate);
   var e8teams={};
-  // Games 57-60 are E8 matchups. Each E8 game has 2 teams from S16 winners.
-  // The player's picks for games 49-56 (Sweet 16) determine who they think makes E8.
-  // Simpler: just get all unique teams they picked in games 49+ (S16 through championship)
-  // Those are the teams they think make E8 or further.
   for(var g=49;g<=63;g++){
     var pk=p.p[g];
     if(pk&&!el[pk])e8teams[pk]=1;
   }
-  return{i:i,n:p.n,ch:p.ch,sc:r.sc,co:r.co,wr:r.wr,al:r.al,mx:r.mx,st:r.st,p:p.p,e8a:Object.keys(e8teams).length}}).sort(function(a,b){return b.sc-a.sc||b.co-a.co});ST.forEach(function(s,i){s.rk=i+1;if(i>0&&s.sc===ST[i-1].sc&&s.co===ST[i-1].co)s.rk=ST[i-1].rk})}
+  return{i:i,n:p.n,ch:p.ch,sc:r.sc,co:r.co,wr:r.wr,al:r.al,mx:r.mx,st:r.st,p:p.p,e8a:Object.keys(e8teams).length,proj:proj}}).sort(function(a,b){return b.sc-a.sc||b.co-a.co});ST.forEach(function(s,i){s.rk=i+1;if(i>0&&s.sc===ST[i-1].sc&&s.co===ST[i-1].co)s.rk=ST[i-1].rk})}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
 
 // NAV
@@ -584,7 +584,7 @@ if(lk.length){h+='<div class="live-bar">';lk.forEach(function(g){var d=LG[g],tm=
 h+=funStats();
 h+='<div class="cr"><div class="st">Overall Standings</div><div style="display:flex;align-items:center;gap:12px"><span style="font-size:12px;color:#9ca3af;font-weight:500">Total Brackets: '+PP.length+'</span><div class="mp">';
 [["std","Standard"],["sb","+Seed"],["sm","\u00d7Seed"]].forEach(function(m){h+='<button class="mb'+(S.mode===m[0]?" on":"")+'" onclick="setM(\''+m[0]+'\')">'+m[1]+'</button>'});
-h+='<button class="mb" onclick="showH2H()" style="margin-left:4px">H2H</button></div></div></div><div class="tw"><table><thead><tr><th class="c" style="width:50px">RANK</th><th class="c" style="width:60px">CHAMPION</th><th class="l">BRACKET NAME</th><th class="c">PTS</th><th class="c">E8 LEFT</th><th class="c">MAX</th><th class="c">CPK</th><th class="c">RD1</th><th class="c">RD2</th><th class="c">S16</th><th class="c">E8</th><th class="c">FF</th><th class="c">NCG</th></tr></thead><tbody>';
+h+='<button class="mb" onclick="showH2H()" style="margin-left:4px">H2H</button></div></div></div><div class="tw"><table><thead><tr><th class="c" style="width:50px">RANK</th><th class="c" style="width:60px">CHAMPION</th><th class="l">BRACKET NAME</th><th class="c">PTS</th><th class="c" title="Projected final score based on your accuracy × alive picks">PROJ</th><th class="c">E8 LEFT</th><th class="c">MAX</th><th class="c">CPK</th><th class="c">RD1</th><th class="c">RD2</th><th class="c">S16</th><th class="c">E8</th><th class="c">FF</th><th class="c">NCG</th></tr></thead><tbody>';
 var topPts=ST[0]?ST[0].sc:0;
 ST.forEach(function(p){
   var isTaylor=false;
@@ -597,6 +597,7 @@ ST.forEach(function(p){
   h+='<td class="c" style="white-space:nowrap">'+li(p.ch,24)+'<span class="mono" style="font-size:9px;color:#9ca3af;margin-left:2px">'+(TS[p.ch]||"")+'</span></td>';
   h+='<td class="nm" style="font-size:15px">'+esc(p.n)+(isEliminated?' \ud83d\udc80':'')+'</td>';
   h+='<td class="c mono pt">'+p.sc+'</td>';
+  h+='<td class="c mono" style="font-weight:700;color:#d97706">'+p.proj+'</td>';
   h+='<td class="c mono" style="font-weight:700;color:'+(p.e8a>=3?'#16a34a':p.e8a>=1?'#2563eb':'#dc2626')+'">'+p.e8a+'</td>';
   h+='<td class="c mono" style="color:#6b7280">'+p.mx+'</td>';
   h+='<td class="c mono" style="color:#1a1a2e;font-weight:600">'+p.co+'</td>';

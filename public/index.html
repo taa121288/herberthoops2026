@@ -530,7 +530,7 @@ function calc(){var el=getEl();
     var pk=p.p[g];
     if(pk&&!el[pk])e8teams[pk]=1;
   }
-  return{i:i,n:p.n,ch:p.ch,sc:r.sc,co:r.co,wr:r.wr,al:r.al,mx:r.mx,st:r.st,p:p.p,e8a:Object.keys(e8teams).length,proj:proj}}).sort(function(a,b){return b.sc-a.sc||b.co-a.co});ST.forEach(function(s,i){s.rk=i+1;if(i>0&&s.sc===ST[i-1].sc&&s.co===ST[i-1].co)s.rk=ST[i-1].rk})}
+  return{i:i,n:p.n,ch:p.ch,sc:r.sc,co:r.co,wr:r.wr,al:r.al,mx:r.mx,st:r.st,p:p.p,e8a:Object.keys(e8teams).length,proj:proj}}).sort(function(a,b){return b.sc-a.sc||b.co-a.co});ST.forEach(function(s,i){s.rk=i+1;if(i>0&&s.sc===ST[i-1].sc)s.rk=ST[i-1].rk})}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
 
 // NAV

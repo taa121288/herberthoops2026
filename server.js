@@ -20,13 +20,13 @@ const ESPN_IDS = {
   "Michigan St":127,"N. Dakota St":2449,"UCLA":26,"UCF":2116,"UConn":41,
   "Furman":231,"Florida":57,"PVAM":2504,"Clemson":228,"Iowa":2294,
   "Vanderbilt":238,"McNeese":2377,"Nebraska":158,"Troy":2653,"N. Carolina":153,
-  "VCU":2670,"Illinois":356,"Penn":219,"MARYCA":2345,"Texas A&M":245,
-  "Houston":248,"Idaho":70,"Arizona":12,"LIU":112027,"Villanova":222,
+  "VCU":2670,"Illinois":356,"Penn":219,"MARYCA":2608,"Texas A&M":245,
+  "Houston":248,"Idaho":70,"Arizona":12,"LIU":112358,"Villanova":222,
   "Utah St":328,"Wisconsin":275,"High Point":2272,"Arkansas":8,"Hawaii":62,
   "BYU":252,"Texas":251,"Gonzaga":2250,"Kennesaw St":338,"Miami":2390,
-  "Missouri":142,"Purdue":2509,"Queens":164809,"Michigan":130,"Howard":47,
+  "Missouri":142,"Purdue":2509,"Queens":2511,"Michigan":130,"Howard":47,
   "Georgia":61,"Saint Louis":139,"Texas Tech":2641,"Akron":2006,"Alabama":333,
-  "Hofstra":2275,"Tennessee":2633,"Miami OH":193,"Virginia":258,"Wright St":2900,
+  "Hofstra":2275,"Tennessee":2633,"Miami OH":193,"Virginia":258,"Wright St":2750,
   "Kentucky":96,"Santa Clara":2541,"Iowa St":66,"Tenn. State":2634
 };
 

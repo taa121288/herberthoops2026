@@ -480,7 +480,7 @@ var RGM={"East":{r1:[1,2,3,4,5,6,7,8],r2:[33,34,35,36],s16:[49,50],e8:[57]},"Sou
 var TS={},GR={},GT={};
 FR.forEach(function(g){TS[g[2]]=g[1];TS[g[4]]=g[3];GR[g[0]]=0;GT[g[0]]={t:"f",a:[g[2],g[4]],s:[g[1],g[3]]}});
 FD.forEach(function(g){GR[g[0]]=g[4];GT[g[0]]={t:"l",f:[g[1],g[2]]}});
-function gT(gid,p){var n=GT[gid];if(n.t==="f")return[{t:n.a[0],s:n.s[0]},{t:n.a[1],s:n.s[1]}];var t1=RES[n.f[0]]||(p?p[n.f[0]]:null),t2=RES[n.f[1]]||(p?p[n.f[1]]:null);return[{t:t1,s:t1?TS[t1]:null},{t:t2,s:t2?TS[t2]:null}]}
+function gT(gid,p){var n=GT[gid];if(n.t==="f")return[{t:n.a[0],s:n.s[0]},{t:n.a[1],s:n.s[1]}];var t1=(p?p[n.f[0]]:null)||RES[n.f[0]]||null,t2=(p?p[n.f[1]]:null)||RES[n.f[1]]||null;return[{t:t1,s:t1?TS[t1]:null},{t:t2,s:t2?TS[t2]:null}]}
 
 var PP=[
 {n:"Harrison Herbert",ch:"Duke",p:{1:"Duke",2:"TCU",3:"St. John's",4:"Kansas",5:"Louisville",6:"Michigan St",7:"UCF",8:"UConn",9:"Florida",10:"Iowa",11:"Vanderbilt",12:"Nebraska",13:"N. Carolina",14:"Illinois",15:"Texas A&M",16:"Houston",17:"Arizona",18:"Utah St",19:"Wisconsin",20:"Arkansas",21:"BYU",22:"Gonzaga",23:"Missouri",24:"Purdue",25:"Michigan",26:"Georgia",27:"Texas Tech",28:"Alabama",29:"Tennessee",30:"Virginia",31:"Kentucky",32:"Iowa St",33:"Duke",34:"Kansas",35:"Michigan St",36:"UConn",37:"Florida",38:"Vanderbilt",39:"N. Carolina",40:"Houston",41:"Arizona",42:"Arkansas",43:"Gonzaga",44:"Purdue",45:"Michigan",46:"Texas Tech",47:"Virginia",48:"Iowa St",49:"Duke",50:"Michigan St",51:"Florida",52:"Houston",53:"Arizona",54:"Purdue",55:"Michigan",56:"Iowa St",57:"Duke",58:"Houston",59:"Arizona",60:"Michigan",61:"Duke",62:"Michigan",63:"Duke"}},

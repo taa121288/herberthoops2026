@@ -639,13 +639,31 @@ h+='<div class="leg"><div class="li"><div class="ldot" style="background:#16a34a
 if(S.reg==="Final Four")h+=rFF(d);else h+=rReg(S.reg,d);
 h+='</div>';a.innerHTML=h}
 
+function canTrace(team,gid){if(!gid||gid<1||gid>63)return false;var n=GT[gid];if(!n)return false;if(n.t==="f")return n.a[0]===team||n.a[1]===team;return canTrace(team,n.f[0])||canTrace(team,n.f[1])}
 function muHTML(gid,picks,sts){var tm=gT(gid,picks),t1=tm[0].t,t2=tm[1].t,s1=tm[0].s,s2=tm[1].s,pk=picks[gid],ss=sts[gid]?sts[gid].s:"alive",lv=!!LG[gid],lgd=LG[gid],gsc=SC[gid],win=RES[gid]||null;
 function getScore(t){if(!gsc||!t)return"";if(gsc.t1===t)return gsc.s1;if(gsc.t2===t)return gsc.s2;return""}
-function row(t,s,bot){var ip=t===pk,isW=t&&t===win,cls="mt"+(bot?" bot":"")+(ip?" p"+ss[0]:""),nc="mn"+(ip?" pk "+ss:"")+(isW&&!ip?" winner":""),sc=getScore(t);
+var pickVis=!pk||pk===t1||pk===t2,missTop=null,missBot=null;
+if(!pickVis){var nd=GT[gid];if(nd.t!=="f"){var inF1=canTrace(pk,nd.f[0]),inF2=canTrace(pk,nd.f[1]);if(inF1&&!inF2)missTop=pk;else if(inF2&&!inF1)missBot=pk;else missTop=pk}}
+function row(t,s,bot,missed){var ip=t===pk,isW=t&&t===win;
+if(missed&&t){var mss=ss==="alive"?"alive":"wrong",pks=TS[missed]||"",cls="mt"+(bot?" bot":"")+" p"+(mss==="alive"?"a":"w");var sc=getScore(t);
+return'<div class="'+cls+'" style="flex-wrap:wrap;row-gap:0;padding:3px 7px">'
++'<div style="display:flex;align-items:center;gap:4px;width:100%">'
++'<div class="md '+mss+'"></div>'
++li(missed,14)
++'<span class="ms" style="font-size:8px">'+esc(pks)+'</span>'
++'<span style="font-size:10px;font-weight:700;color:'+(mss==="alive"?"#2563eb":"#dc2626")+';text-decoration:line-through;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(missed)+'</span>'
++'</div>'
++'<div style="display:flex;align-items:center;gap:4px;width:100%;margin-top:1px">'
++li(t,14)
++'<span class="ms" style="font-size:8px">'+esc(s||"")+'</span>'
++'<span class="mn'+(isW?" winner":"")+'">'+esc(t)+'</span>'
++(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')
++'</div></div>'}
+var cls="mt"+(bot?" bot":"")+(ip?" p"+ss[0]:""),nc="mn"+(ip?" pk "+ss:"")+(isW&&!ip?" winner":""),sc=getScore(t);
 return'<div class="'+cls+'">'+(t?li(t,16):'<div class="mlp">?</div>')+'<span class="ms">'+(s||"")+'</span><span class="'+nc+'">'+(t?esc(t):"TBD")+'</span>'+(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')+(ip?'<div class="md '+ss+'"></div>':'')+'</div>'}
 var liveScoreBar="";
 if(lv&&lgd){liveScoreBar='<div class="mlsc">'+esc(lgd.score)+' \u2022 '+esc(lgd.time)+'</div>'}
-return'<div class="mu'+(lv?" lv":"")+'" onclick="showGamePopup('+gid+')" style="cursor:pointer;border-color:'+(lv?"#2563eb80":"")+'">'+(lv?'<div class="mlt">LIVE</div>':"")+row(t1,s1,false)+row(t2,s2,true)+liveScoreBar+'</div>'}
+return'<div class="mu'+(lv?" lv":"")+'" onclick="showGamePopup('+gid+')" style="cursor:pointer;border-color:'+(lv?"#2563eb80":"")+'">'+(lv?'<div class="mlt">LIVE</div>':"")+row(t1,s1,false,missTop)+row(t2,s2,true,missBot)+liveScoreBar+'</div>'}
 
 function rReg(reg,d){var rg=RGM[reg];if(!rg)return"";var rounds=[{n:"First Round",g:rg.r1},{n:"Round of 32",g:rg.r2},{n:"Sweet 16",g:rg.s16},{n:"Elite 8",g:rg.e8}],mH=58,g0=6;
 var h='<div class="bs"><div class="bg" style="min-width:840px">';

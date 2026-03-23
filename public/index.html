@@ -136,6 +136,12 @@ td{padding:10px 12px;font-size:13px}
 .mn.pk.correct{color:#16a34a}.mn.pk.wrong{color:#dc2626}.mn.pk.eliminated{color:#dc2626}.mn.pk.alive{color:#2563eb}
 .md{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .md.correct{background:#16a34a}.md.wrong{background:#dc2626}.md.eliminated{background:#dc2626}.md.alive{background:#2563eb}
+.pk-row{display:flex;align-items:center;gap:4px;padding:2px 7px;min-height:20px;border-bottom:1px solid #e0e0e0}
+.pk-row.correct{background:#dcfce7}.pk-row.wrong,.pk-row.eliminated{background:#fee2e2}.pk-row.alive{background:#dbeafe}
+.pk-label{font-size:7px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;min-width:22px}
+.pk-name{font-size:10px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-name.correct{color:#16a34a}.pk-name.wrong,.pk-name.eliminated{color:#dc2626}.pk-name.alive{color:#2563eb}
+.mn.winner{color:#16a34a;font-weight:700}
 
 .chd{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:8px;padding:16px;text-align:center;width:140px}
 .chd img{border-radius:50%;width:48px;height:48px;object-fit:cover}
@@ -480,7 +486,7 @@ var RGM={"East":{r1:[1,2,3,4,5,6,7,8],r2:[33,34,35,36],s16:[49,50],e8:[57]},"Sou
 var TS={},GR={},GT={};
 FR.forEach(function(g){TS[g[2]]=g[1];TS[g[4]]=g[3];GR[g[0]]=0;GT[g[0]]={t:"f",a:[g[2],g[4]],s:[g[1],g[3]]}});
 FD.forEach(function(g){GR[g[0]]=g[4];GT[g[0]]={t:"l",f:[g[1],g[2]]}});
-function gT(gid,p){var n=GT[gid];if(n.t==="f")return[{t:n.a[0],s:n.s[0]},{t:n.a[1],s:n.s[1]}];var t1=(p?p[n.f[0]]:null)||RES[n.f[0]]||null,t2=(p?p[n.f[1]]:null)||RES[n.f[1]]||null;return[{t:t1,s:t1?TS[t1]:null},{t:t2,s:t2?TS[t2]:null}]}
+function gT(gid,p){var n=GT[gid];if(n.t==="f")return[{t:n.a[0],s:n.s[0]},{t:n.a[1],s:n.s[1]}];var t1=RES[n.f[0]]||(p?p[n.f[0]]:null),t2=RES[n.f[1]]||(p?p[n.f[1]]:null);return[{t:t1,s:t1?TS[t1]:null},{t:t2,s:t2?TS[t2]:null}]}
 
 var PP=[
 {n:"Harrison Herbert",ch:"Duke",p:{1:"Duke",2:"TCU",3:"St. John's",4:"Kansas",5:"Louisville",6:"Michigan St",7:"UCF",8:"UConn",9:"Florida",10:"Iowa",11:"Vanderbilt",12:"Nebraska",13:"N. Carolina",14:"Illinois",15:"Texas A&M",16:"Houston",17:"Arizona",18:"Utah St",19:"Wisconsin",20:"Arkansas",21:"BYU",22:"Gonzaga",23:"Missouri",24:"Purdue",25:"Michigan",26:"Georgia",27:"Texas Tech",28:"Alabama",29:"Tennessee",30:"Virginia",31:"Kentucky",32:"Iowa St",33:"Duke",34:"Kansas",35:"Michigan St",36:"UConn",37:"Florida",38:"Vanderbilt",39:"N. Carolina",40:"Houston",41:"Arizona",42:"Arkansas",43:"Gonzaga",44:"Purdue",45:"Michigan",46:"Texas Tech",47:"Virginia",48:"Iowa St",49:"Duke",50:"Michigan St",51:"Florida",52:"Houston",53:"Arizona",54:"Purdue",55:"Michigan",56:"Iowa St",57:"Duke",58:"Houston",59:"Arizona",60:"Michigan",61:"Duke",62:"Michigan",63:"Duke"}},
@@ -491,7 +497,7 @@ var PP=[
 ];
 
 // STATE
-var RES={},LG={},SC={},S={v:"standings",pi:null,reg:"East",mode:"std",adm:false,pw:"",loggedIn:false},ST=[];
+var RES={},LG={},SC={},S={v:"standings",pi:null,reg:"East",mode:"std",adm:false,pw:"",loggedIn:false},ST=[],EL={};
 
 // Dual mode: server fetch with localStorage fallback
 var SERVER_MODE=false;
@@ -519,7 +525,7 @@ function score(p){var el=getEl(),m=S.mode,sc=0,co=0,wr=0,al=0,st={};for(var g=1;
 
 // PROJECTION — based on bracket health (your accuracy × your alive picks)
 // PROJ = current pts + alive pts × (correct / games decided)
-function calc(){var el=getEl();
+function calc(){var el=getEl();EL=el;
   var decided=Object.keys(RES).length;
   ST=PP.map(function(p,i){var r=score(p);
   var hitRate=decided>0?r.co/decided:0.5;
@@ -633,16 +639,15 @@ h+='<div class="leg"><div class="li"><div class="ldot" style="background:#16a34a
 if(S.reg==="Final Four")h+=rFF(d);else h+=rReg(S.reg,d);
 h+='</div>';a.innerHTML=h}
 
-function muHTML(gid,picks,sts){var tm=gT(gid,picks),t1=tm[0].t,t2=tm[1].t,s1=tm[0].s,s2=tm[1].s,pk=picks[gid],ss=sts[gid]?sts[gid].s:"alive",lv=!!LG[gid],lgd=LG[gid],gsc=SC[gid];
-var bc={correct:"#dcfce7",wrong:"#fee2e2",eliminated:"#fee2e2",alive:"#dbeafe"};
+function muHTML(gid,picks,sts){var atm=gT(gid,null),at1=atm[0].t,at2=atm[1].t,as1=atm[0].s,as2=atm[1].s;var pk=picks[gid],ss=sts[gid]?sts[gid].s:"alive",lv=!!LG[gid],lgd=LG[gid],gsc=SC[gid],win=RES[gid]||null;
+var pkr='<div class="pk-row '+ss+'"><span class="pk-label">PICK</span>'+(pk?li(pk,14):'')+'<span class="pk-name '+ss+'">'+(pk?esc(pk):"TBD")+'</span><div class="md '+ss+'"></div></div>';
 function getScore(t){if(!gsc||!t)return"";if(gsc.t1===t)return gsc.s1;if(gsc.t2===t)return gsc.s2;return""}
-function row(t,s,bot){var ip=t===pk,cls="mt"+(bot?" bot":"")+(ip?" p"+ss[0]:""),nc="mn"+(ip?" pk "+ss:""),sc=getScore(t);
-return'<div class="'+cls+'">'+(t?li(t,16):'<div class="mlp">?</div>')+'<span class="ms">'+(s||"")+'</span><span class="'+nc+'">'+(t?esc(t):"TBD")+'</span>'+(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')+(ip?'<div class="md '+ss+'"></div>':'')+'</div>'}
+function aRow(t,s,bot){var isW=t&&t===win,sc=getScore(t);return'<div class="mt'+(bot?" bot":"")+'">'+(t?li(t,16):'<div class="mlp">?</div>')+'<span class="ms">'+(s||"")+'</span><span class="mn'+(isW?" winner":"")+'">'+(t?esc(t):"TBD")+'</span>'+(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')+'</div>'}
 var liveScoreBar="";
 if(lv&&lgd){liveScoreBar='<div class="mlsc">'+esc(lgd.score)+' \u2022 '+esc(lgd.time)+'</div>'}
-return'<div class="mu'+(lv?" lv":"")+'" style="border-color:'+(lv?"#2563eb80":"")+'">'+(lv?'<div class="mlt">LIVE</div>':"")+row(t1,s1,false)+row(t2,s2,true)+liveScoreBar+'</div>'}
+return'<div class="mu'+(lv?" lv":"")+'" onclick="showGamePopup('+gid+')" style="cursor:pointer;border-color:'+(lv?"#2563eb80":"")+'">'+(lv?'<div class="mlt">LIVE</div>':"")+pkr+aRow(at1,as1,false)+aRow(at2,as2,true)+liveScoreBar+'</div>'}
 
-function rReg(reg,d){var rg=RGM[reg];if(!rg)return"";var rounds=[{n:"First Round",g:rg.r1},{n:"Round of 32",g:rg.r2},{n:"Sweet 16",g:rg.s16},{n:"Elite 8",g:rg.e8}],mH=58,g0=6;
+function rReg(reg,d){var rg=RGM[reg];if(!rg)return"";var rounds=[{n:"First Round",g:rg.r1},{n:"Round of 32",g:rg.r2},{n:"Sweet 16",g:rg.s16},{n:"Elite 8",g:rg.e8}],mH=76,g0=6;
 var h='<div class="bs"><div class="bg" style="min-width:840px">';
 rounds.forEach(function(rd,ri){var tp,gb;if(ri===0){tp=0;gb=g0}else if(ri===1){tp=(mH+g0)/2;gb=mH+g0*2}else if(ri===2){tp=(mH+g0)*1.5+g0/2;gb=(mH+g0)*3+g0}else{tp=(mH+g0)*3.5+g0;gb=0}
 h+='<div class="bc"><div class="cl">'+rd.n+'</div><div class="cg" style="padding-top:'+tp+'px;gap:'+gb+'px">';rd.g.forEach(function(gid){h+=muHTML(gid,d.p,d.st)});h+='</div></div>'});
@@ -650,8 +655,8 @@ return h+'</div></div>'}
 
 function rFF(d){var pr=PP[d.i],h='<div class="bs"><div class="bg" style="min-width:580px">';
 h+='<div class="bc"><div class="cl">Final Four</div><div class="cg" style="gap:32px">';[61,62].forEach(function(g){h+=muHTML(g,d.p,d.st)});h+='</div></div>';
-h+='<div class="bc"><div class="cl">Championship</div><div class="cg" style="padding-top:32px">';h+=muHTML(63,d.p,d.st);h+='</div></div>';
-h+='<div class="bc"><div class="cl">Champion</div><div style="padding-top:28px;display:flex;justify-content:center"><div class="chd">'+li(pr.ch,48)+'<div class="cdn">'+esc(pr.ch)+'</div><div class="cds">('+( TS[pr.ch]||"")+') seed</div></div></div></div>';
+h+='<div class="bc"><div class="cl">Championship</div><div class="cg" style="padding-top:54px">';h+=muHTML(63,d.p,d.st);h+='</div></div>';
+h+='<div class="bc"><div class="cl">Champion</div><div style="padding-top:40px;display:flex;justify-content:center"><div class="chd">'+li(pr.ch,48)+'<div class="cdn">'+esc(pr.ch)+'</div><div class="cds">('+( TS[pr.ch]||"")+') seed</div></div></div></div>';
 return h+'</div></div>'}
 
 // ACTIONS

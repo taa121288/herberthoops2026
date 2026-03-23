@@ -639,15 +639,15 @@ h+='<div class="leg"><div class="li"><div class="ldot" style="background:#16a34a
 if(S.reg==="Final Four")h+=rFF(d);else h+=rReg(S.reg,d);
 h+='</div>';a.innerHTML=h}
 
-function muHTML(gid,picks,sts){var atm=gT(gid,null),at1=atm[0].t,at2=atm[1].t,as1=atm[0].s,as2=atm[1].s;var pk=picks[gid],ss=sts[gid]?sts[gid].s:"alive",lv=!!LG[gid],lgd=LG[gid],gsc=SC[gid],win=RES[gid]||null;
-var pkr='<div class="pk-row '+ss+'"><span class="pk-label">PICK</span>'+(pk?li(pk,14):'')+'<span class="pk-name '+ss+'">'+(pk?esc(pk):"TBD")+'</span><div class="md '+ss+'"></div></div>';
+function muHTML(gid,picks,sts){var tm=gT(gid,picks),t1=tm[0].t,t2=tm[1].t,s1=tm[0].s,s2=tm[1].s,pk=picks[gid],ss=sts[gid]?sts[gid].s:"alive",lv=!!LG[gid],lgd=LG[gid],gsc=SC[gid],win=RES[gid]||null;
 function getScore(t){if(!gsc||!t)return"";if(gsc.t1===t)return gsc.s1;if(gsc.t2===t)return gsc.s2;return""}
-function aRow(t,s,bot){var isW=t&&t===win,sc=getScore(t);return'<div class="mt'+(bot?" bot":"")+'">'+(t?li(t,16):'<div class="mlp">?</div>')+'<span class="ms">'+(s||"")+'</span><span class="mn'+(isW?" winner":"")+'">'+(t?esc(t):"TBD")+'</span>'+(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')+'</div>'}
+function row(t,s,bot){var ip=t===pk,isW=t&&t===win,cls="mt"+(bot?" bot":"")+(ip?" p"+ss[0]:""),nc="mn"+(ip?" pk "+ss:"")+(isW&&!ip?" winner":""),sc=getScore(t);
+return'<div class="'+cls+'">'+(t?li(t,16):'<div class="mlp">?</div>')+'<span class="ms">'+(s||"")+'</span><span class="'+nc+'">'+(t?esc(t):"TBD")+'</span>'+(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')+(ip?'<div class="md '+ss+'"></div>':'')+'</div>'}
 var liveScoreBar="";
 if(lv&&lgd){liveScoreBar='<div class="mlsc">'+esc(lgd.score)+' \u2022 '+esc(lgd.time)+'</div>'}
-return'<div class="mu'+(lv?" lv":"")+'" onclick="showGamePopup('+gid+')" style="cursor:pointer;border-color:'+(lv?"#2563eb80":"")+'">'+(lv?'<div class="mlt">LIVE</div>':"")+pkr+aRow(at1,as1,false)+aRow(at2,as2,true)+liveScoreBar+'</div>'}
+return'<div class="mu'+(lv?" lv":"")+'" onclick="showGamePopup('+gid+')" style="cursor:pointer;border-color:'+(lv?"#2563eb80":"")+'">'+(lv?'<div class="mlt">LIVE</div>':"")+row(t1,s1,false)+row(t2,s2,true)+liveScoreBar+'</div>'}
 
-function rReg(reg,d){var rg=RGM[reg];if(!rg)return"";var rounds=[{n:"First Round",g:rg.r1},{n:"Round of 32",g:rg.r2},{n:"Sweet 16",g:rg.s16},{n:"Elite 8",g:rg.e8}],mH=76,g0=6;
+function rReg(reg,d){var rg=RGM[reg];if(!rg)return"";var rounds=[{n:"First Round",g:rg.r1},{n:"Round of 32",g:rg.r2},{n:"Sweet 16",g:rg.s16},{n:"Elite 8",g:rg.e8}],mH=58,g0=6;
 var h='<div class="bs"><div class="bg" style="min-width:840px">';
 rounds.forEach(function(rd,ri){var tp,gb;if(ri===0){tp=0;gb=g0}else if(ri===1){tp=(mH+g0)/2;gb=mH+g0*2}else if(ri===2){tp=(mH+g0)*1.5+g0/2;gb=(mH+g0)*3+g0}else{tp=(mH+g0)*3.5+g0;gb=0}
 h+='<div class="bc"><div class="cl">'+rd.n+'</div><div class="cg" style="padding-top:'+tp+'px;gap:'+gb+'px">';rd.g.forEach(function(gid){h+=muHTML(gid,d.p,d.st)});h+='</div></div>'});
@@ -655,8 +655,8 @@ return h+'</div></div>'}
 
 function rFF(d){var pr=PP[d.i],h='<div class="bs"><div class="bg" style="min-width:580px">';
 h+='<div class="bc"><div class="cl">Final Four</div><div class="cg" style="gap:32px">';[61,62].forEach(function(g){h+=muHTML(g,d.p,d.st)});h+='</div></div>';
-h+='<div class="bc"><div class="cl">Championship</div><div class="cg" style="padding-top:54px">';h+=muHTML(63,d.p,d.st);h+='</div></div>';
-h+='<div class="bc"><div class="cl">Champion</div><div style="padding-top:40px;display:flex;justify-content:center"><div class="chd">'+li(pr.ch,48)+'<div class="cdn">'+esc(pr.ch)+'</div><div class="cds">('+( TS[pr.ch]||"")+') seed</div></div></div></div>';
+h+='<div class="bc"><div class="cl">Championship</div><div class="cg" style="padding-top:32px">';h+=muHTML(63,d.p,d.st);h+='</div></div>';
+h+='<div class="bc"><div class="cl">Champion</div><div style="padding-top:28px;display:flex;justify-content:center"><div class="chd">'+li(pr.ch,48)+'<div class="cdn">'+esc(pr.ch)+'</div><div class="cds">('+( TS[pr.ch]||"")+') seed</div></div></div></div>';
 return h+'</div></div>'}
 
 // ACTIONS

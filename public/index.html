@@ -645,17 +645,17 @@ function getScore(t){if(!gsc||!t)return"";if(gsc.t1===t)return gsc.s1;if(gsc.t2=
 var pickVis=!pk||pk===t1||pk===t2,missTop=null,missBot=null;
 if(!pickVis){var nd=GT[gid];if(nd.t!=="f"){var inF1=canTrace(pk,nd.f[0]),inF2=canTrace(pk,nd.f[1]);if(inF1&&!inF2)missTop=pk;else if(inF2&&!inF1)missBot=pk;else missTop=pk}}
 function row(t,s,bot,missed){var ip=t===pk,isW=t&&t===win;
-if(missed&&t){var mss=ss==="alive"?"alive":"wrong",pks=TS[missed]||"",cls="mt"+(bot?" bot":"")+" p"+(mss==="alive"?"a":"w");var sc=getScore(t);
+if(missed&&t){var mss=ss==="alive"?"alive":"wrong",pks=""+(TS[missed]||""),cls="mt"+(bot?" bot":"")+" p"+(mss==="alive"?"a":"w");var sc=getScore(t);
 return'<div class="'+cls+'" style="flex-wrap:wrap;row-gap:0;padding:3px 7px">'
 +'<div style="display:flex;align-items:center;gap:4px;width:100%">'
 +'<div class="md '+mss+'"></div>'
 +li(missed,14)
-+'<span class="ms" style="font-size:8px">'+esc(pks)+'</span>'
++'<span class="ms" style="font-size:8px">'+pks+'</span>'
 +'<span style="font-size:10px;font-weight:700;color:'+(mss==="alive"?"#2563eb":"#dc2626")+';text-decoration:line-through;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(missed)+'</span>'
 +'</div>'
 +'<div style="display:flex;align-items:center;gap:4px;width:100%;margin-top:1px">'
 +li(t,14)
-+'<span class="ms" style="font-size:8px">'+esc(s||"")+'</span>'
++'<span class="ms" style="font-size:8px">'+(s||"")+'</span>'
 +'<span class="mn'+(isW?" winner":"")+'">'+esc(t)+'</span>'
 +(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')
 +'</div></div>'}

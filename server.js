@@ -139,14 +139,10 @@ async function fetchEspnScores() {
   }
 
   for (const dateStr of dates) {
-    // Try multiple group IDs — ESPN changes the tournament group across years
-    // groups=100 = NCAA Tournament, groups=50 = conference tournaments, no group = all games
-    const urls = [
-      `https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates=${dateStr}&groups=100&limit=100`,
-      `https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates=${dateStr}&limit=100`
-    ];
-    const seen = new Set();
-    for (const url of urls) {
+    // ONLY use the NCAA Tournament group (groups=100) to avoid matching
+    // non-tournament games (NIT, conference tournaments, regular season)
+    // between teams that happen to share a bracket slot
+    const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates=${dateStr}&groups=100&limit=100`;
     try {
       const json = await httpGet(url);
       if (!json.events) continue;
@@ -155,16 +151,21 @@ async function fetchEspnScores() {
         const comp = event.competitions && event.competitions[0];
         if (!comp || !comp.competitors || comp.competitors.length !== 2) continue;
 
+        // Extra safety: skip games that aren't tagged as NCAA Tournament
+        const notes = (event.competitions && event.competitions[0] && event.competitions[0].notes) || [];
+        const headline = notes.map(n => (n.headline || '').toLowerCase()).join(' ');
+        const isTournament = headline.includes('ncaa') || headline.includes('tournament') ||
+          headline.includes('march madness') || (event.season && event.season.type === 3);
+        // If ESPN returns notes and none mention NCAA/tournament, skip this game
+        if (notes.length > 0 && !isTournament) {
+          continue;
+        }
+
         const c1 = comp.competitors[0];
         const c2 = comp.competitors[1];
         const id1 = c1.team && c1.team.id;
         const id2 = c2.team && c2.team.id;
         if (!id1 || !id2) continue;
-
-        // Skip if we already processed this matchup from another group URL
-        const matchKey = [id1, id2].sort().join('-');
-        if (seen.has(matchKey)) continue;
-        seen.add(matchKey);
 
         const isComplete = comp.status && comp.status.type && comp.status.type.completed;
         const isInProgress = comp.status && comp.status.type &&
@@ -214,9 +215,8 @@ async function fetchEspnScores() {
         }
       }
     } catch (e) {
-      // Skip URLs/dates that fail — ESPN might not have data for them
+      // Skip dates that fail — ESPN might not have data for them
     }
-    } // end of urls loop
   }
 
   data.liveGames = liveGames;

@@ -451,24 +451,51 @@ var SCHEDULE={};
 function upcomingGamesHTML(){
   var resultCount=Object.keys(RES).length;
   if(resultCount>=63)return'<div style="font-size:14px;font-weight:700;color:#2563eb">Tournament Complete! \ud83c\udfc6</div>';
+  /* Find current round: first round with any unresolved game */
+  var curRound=-1;
+  for(var g=1;g<=63;g++){if(!RES[g]){curRound=GR[g];break}}
+  if(curRound<0)return'<div style="font-size:12px;color:#9ca3af">Waiting for earlier rounds to finish</div>';
+  var roundName=RN[curRound];
+  /* Collect ALL games in current round */
   var upcoming=[];
   for(var g=1;g<=63;g++){
-    if(RES[g])continue;
+    if(GR[g]!==curRound)continue;
     var tm=gT(g,null);
     var isLive=!!LG[g];
-    if(tm[0].t&&tm[1].t) upcoming.push({g:g,t1:tm[0].t,s1:tm[0].s,t2:tm[1].t,s2:tm[1].s,live:isLive});
-    if(upcoming.length>=6)break;
+    if(tm[0].t&&tm[1].t){
+      upcoming.push({g:g,t1:tm[0].t,s1:tm[0].s,t2:tm[1].t,s2:tm[1].s,live:isLive});
+    }
   }
   if(upcoming.length===0)return'<div style="font-size:12px;color:#9ca3af">Waiting for earlier rounds to finish</div>';
-  var h='';
+  var h='<div style="font-size:13px;font-weight:800;color:#1a1a2e;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">'+esc(roundName)+'</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">';
   upcoming.forEach(function(u){
-    h+='<div onclick="showGamePopup('+u.g+')" style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:1px solid #f0f0f0;font-size:10px;cursor:pointer" onmouseover="this.style.background=\'#f0f7ff\'" onmouseout="this.style.background=\'\'">';
-    if(u.live) h+='<span class="mono" style="font-size:9px;color:#dc2626;min-width:32px;font-weight:600">\u25cf LIVE</span>';
-    h+='<div style="display:flex;align-items:center;gap:2px;flex:1;min-width:0">'+li(u.t1,14)+'<span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(u.s1?'('+u.s1+') ':'')+esc(u.t1)+'</span></div>';
-    h+='<span style="color:#9ca3af;font-weight:700;font-size:8px">vs</span>';
-    h+='<div style="display:flex;align-items:center;gap:2px;flex:1;min-width:0;justify-content:flex-end"><span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u.t2)+(u.s2?' ('+u.s2+')':'')+'</span>'+li(u.t2,14)+'</div>';
+    var lgd=LG[u.g],gsc=SC[u.g],win=RES[u.g];
+    var p1=[],p2=[],pOther=[];
+    PP.forEach(function(p){var pk=p.p[u.g];if(pk===u.t1)p1.push(p.n.split(" ")[0]);else if(pk===u.t2)p2.push(p.n.split(" ")[0]);else pOther.push(p.n.split(" ")[0])});
+    h+='<div onclick="showGamePopup('+u.g+')" style="background:#fff;border:1px solid '+(u.live?"#2563eb":"#e0e0e0")+';border-radius:6px;padding:10px 12px;cursor:pointer;transition:all .12s;box-shadow:0 1px 3px rgba(0,0,0,.04)" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'0 1px 3px rgba(0,0,0,.04)\'">';
+    if(u.live&&lgd){h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px"><div class="ld"></div><span style="font-size:9px;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:.5px">LIVE \u2014 '+esc(lgd.time)+'</span></div>'}
+    else if(gsc&&win){h+='<div style="font-size:9px;color:#16a34a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">FINAL</div>'}
+    var s1=u.live&&lgd?lgd.score.split(" - ")[0]||"":"";
+    var s2=u.live&&lgd?lgd.score.split(" - ")[1]||"":"";
+    if(gsc){s1=gsc.s1;s2=gsc.s2}
+    var w1=win===u.t1,w2=win===u.t2;
+    h+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0'+(w1?";font-weight:700":"")+'">'+li(u.t1,20)+'<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:#9ca3af;min-width:14px">'+(u.s1||"")+'</span><span style="font-size:13px;font-weight:'+(w1?"700":"600")+';color:'+(w1?"#16a34a":"#1a1a2e")+';flex:1">'+esc(u.t1)+'</span>'+(s1?'<span class="mono" style="font-size:13px;font-weight:700;color:#1a1a2e">'+s1+'</span>':'')+'</div>';
+    h+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid #f0f0f0'+(w2?";font-weight:700":"")+'">'+li(u.t2,20)+'<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:#9ca3af;min-width:14px">'+(u.s2||"")+'</span><span style="font-size:13px;font-weight:'+(w2?"700":"600")+';color:'+(w2?"#16a34a":"#1a1a2e")+';flex:1">'+esc(u.t2)+'</span>'+(s2?'<span class="mono" style="font-size:13px;font-weight:700;color:#1a1a2e">'+s2+'</span>':'')+'</div>';
+    var total=PP.length;
+    h+='<div style="display:flex;align-items:center;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0">';
+    h+='<div style="flex:1;text-align:center"><span style="font-size:10px;font-weight:700;color:#2563eb">'+p1.length+'</span><span style="font-size:9px;color:#9ca3af"> picks</span></div>';
+    h+='<div style="flex:2;display:flex;height:6px;border-radius:3px;overflow:hidden;background:#e5e7eb">';
+    if(p1.length)h+='<div style="flex:'+p1.length+';background:#2563eb;border-radius:3px 0 0 3px"></div>';
+    if(pOther.length)h+='<div style="flex:'+pOther.length+';background:#f59e0b"></div>';
+    if(p2.length)h+='<div style="flex:'+p2.length+';background:#dc2626;border-radius:0 3px 3px 0"></div>';
+    h+='</div>';
+    h+='<div style="flex:1;text-align:center"><span style="font-size:10px;font-weight:700;color:#dc2626">'+p2.length+'</span><span style="font-size:9px;color:#9ca3af"> picks</span></div>';
+    h+='</div>';
+    if(pOther.length){h+='<div style="font-size:8px;color:#f59e0b;text-align:center;margin-top:2px">'+pOther.length+' picked other</div>'}
     h+='</div>';
   });
+  h+='</div>';
   return h;
 }
 
@@ -558,7 +585,8 @@ function funStats(){
   var bigUpset=aliveSeeds[0];
   var canWin=ST.filter(function(s){return s.mx>=leaderPts}).length;
 
-  var h='<div class="fun-stats">';h+='<div class="fun-card"><div class="fun-label">Up Next</div>'+upcomingGamesHTML()+'</div>';
+  var h=upcomingGamesHTML();
+  h+='<div class="fun-stats">';
   h+='<div class="fun-card"><div class="fun-label">Tournament Progress</div><div class="fun-val">'+gamesPlayed+' / 63</div><div class="pbar"><div class="pbar-fill" style="width:'+pct+'%;background:#2563eb"></div></div><div class="gb"><span>'+pct+'% complete</span><span>'+gamesLeft+' games left</span></div></div>';
   h+='<div class="fun-card"><div class="fun-label">Can Still Win</div><div class="fun-val">'+canWin+' / '+PP.length+'</div><div class="fun-sub">players with max possible \u2265 leader</div></div>';
   h+='<div class="fun-card"><div class="fun-label">Points Back from #1</div>';

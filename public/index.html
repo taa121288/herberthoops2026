@@ -659,8 +659,12 @@ return'<div class="'+cls+'" style="flex-wrap:wrap;row-gap:0;padding:3px 7px">'
 +'<span class="mn'+(isW?" winner":"")+'">'+esc(t)+'</span>'
 +(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')
 +'</div></div>'}
-var cls="mt"+(bot?" bot":"")+(ip?" p"+ss[0]:""),nc="mn"+(ip?" pk "+ss:"")+(isW&&!ip?" winner":""),sc=getScore(t);
-return'<div class="'+cls+'">'+(t?li(t,16):'<div class="mlp">?</div>')+'<span class="ms">'+(s||"")+'</span><span class="'+nc+'">'+(t?esc(t):"TBD")+'</span>'+(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')+(ip?'<div class="md '+ss+'"></div>':'')+'</div>'}
+var tElim=!win&&t&&EL[t];
+var cls="mt"+(bot?" bot":"")+(ip?" p"+ss[0]:(tElim?" pe":""));
+var nc="mn"+(ip?" pk "+ss:"")+(isW&&!ip?" winner":"");
+var nameXtra=tElim&&!ip?' style="text-decoration:line-through;color:#dc2626"':"";
+var sc=getScore(t);
+return'<div class="'+cls+'">'+(t?li(t,16):'<div class="mlp">?</div>')+'<span class="ms">'+(s||"")+'</span><span class="'+nc+'"'+(ip&&tElim?' style="text-decoration:line-through"':nameXtra)+'>'+(t?esc(t):"TBD")+'</span>'+(sc!==""?'<span class="mono" style="font-size:10px;font-weight:700;color:#1a1a2e;margin-left:auto">'+sc+'</span>':'')+(ip?'<div class="md '+ss+'"></div>':'')+'</div>'}
 var liveScoreBar="";
 if(lv&&lgd){liveScoreBar='<div class="mlsc">'+esc(lgd.score)+' \u2022 '+esc(lgd.time)+'</div>'}
 return'<div class="mu'+(lv?" lv":"")+'" onclick="showGamePopup('+gid+')" style="cursor:pointer;border-color:'+(lv?"#2563eb80":"")+'">'+(lv?'<div class="mlt">LIVE</div>':"")+row(t1,s1,false,missTop)+row(t2,s2,true,missBot)+liveScoreBar+'</div>'}

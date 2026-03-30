@@ -496,6 +496,51 @@ function upcomingGamesHTML(){
     h+='</div>';
   });
   h+='</div>';
+  /* Win probability simulation */
+  var remGames=[];
+  for(var g=1;g<=63;g++){
+    if(!RES[g]){var tm=gT(g,null);if(tm[0].t&&tm[1].t)remGames.push({g:g,t1:tm[0].t,t2:tm[1].t})}
+  }
+  if(remGames.length>0&&remGames.length<=10){
+    var scenarios=Math.pow(2,remGames.length);
+    var wins={};PP.forEach(function(p){wins[p.n]=0});
+    for(var sc=0;sc<scenarios;sc++){
+      var simRES={};for(var k in RES)simRES[k]=RES[k];
+      for(var ri=0;ri<remGames.length;ri++){
+        var bit=(sc>>ri)&1;
+        simRES[remGames[ri].g]=bit===0?remGames[ri].t1:remGames[ri].t2;
+      }
+      var changed=true;
+      while(changed){changed=false;for(var g=1;g<=63;g++){if(simRES[g])continue;var nd=GT[g];if(nd.t==="l"&&simRES[nd.f[0]]&&simRES[nd.f[1]]){changed=false}}}
+      var scores=PP.map(function(p){
+        var pts=0;
+        for(var g=1;g<=63;g++){
+          var pk=p.p[g],ri2=GR[g],bp=RP[ri2],sd=TS[pk]||1;
+          var mpts=S.mode==="sb"?bp+sd:S.mode==="sm"?bp*sd:bp;
+          if(simRES[g]&&simRES[g]===pk)pts+=mpts;
+        }
+        return{n:p.n,pts:pts};
+      });
+      scores.sort(function(a,b){return b.pts-a.pts});
+      var topS=scores[0].pts;
+      var tiedCount=scores.filter(function(x){return x.pts===topS}).length;
+      scores.forEach(function(x){if(x.pts===topS)wins[x.n]+=1/tiedCount});
+    }
+    h+='<div style="margin-top:12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:12px 16px">';
+    h+='<div style="font-size:13px;font-weight:800;color:#1a1a2e;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Win Probability</div>';
+    var wpArr=[];PP.forEach(function(p){wpArr.push({n:p.n,w:wins[p.n],pct:Math.round(wins[p.n]/scenarios*1000)/10})});
+    wpArr.sort(function(a,b){return b.pct-a.pct});
+    wpArr.forEach(function(wp){
+      var barCol=wp.pct>=30?"#16a34a":wp.pct>=10?"#2563eb":wp.pct>0?"#f59e0b":"#dc2626";
+      h+='<div style="display:flex;align-items:center;gap:8px;margin-top:6px">';
+      h+='<span style="font-size:12px;font-weight:600;color:#1a1a2e;min-width:80px;white-space:nowrap">'+esc(wp.n.split(" ")[0])+'</span>';
+      h+='<div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden"><div style="width:'+wp.pct+'%;height:100%;background:'+barCol+';border-radius:4px;transition:width .3s"></div></div>';
+      h+='<span class="mono" style="font-size:12px;font-weight:700;color:'+barCol+';min-width:45px;text-align:right">'+wp.pct+'%</span>';
+      h+='</div>';
+    });
+    h+='<div style="font-size:9px;color:#9ca3af;margin-top:8px;text-align:center">Based on '+scenarios+' possible outcomes of '+remGames.length+' remaining game'+(remGames.length>1?"s":"")+'</div>';
+    h+='</div>';
+  }
   return h;
 }
 

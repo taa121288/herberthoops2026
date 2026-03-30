@@ -496,39 +496,52 @@ function upcomingGamesHTML(){
     h+='</div>';
   });
   h+='</div>';
-  /* Win probability simulation */
-  var remGames=[];
-  for(var g=1;g<=63;g++){
-    if(!RES[g]){var tm=gT(g,null);if(tm[0].t&&tm[1].t)remGames.push({g:g,t1:tm[0].t,t2:tm[1].t})}
-  }
-  if(remGames.length>0&&remGames.length<=10){
-    var scenarios=Math.pow(2,remGames.length);
+  /* Win probability simulation — enumerate all outcomes of all unresolved games */
+  var unresolved=[];
+  for(var g=1;g<=63;g++){if(!RES[g])unresolved.push(g)}
+  var totalUn=unresolved.length;
+  if(totalUn>0&&totalUn<=10){
     var wins={};PP.forEach(function(p){wins[p.n]=0});
-    for(var sc=0;sc<scenarios;sc++){
-      var simRES={};for(var k in RES)simRES[k]=RES[k];
-      for(var ri=0;ri<remGames.length;ri++){
-        var bit=(sc>>ri)&1;
-        simRES[remGames[ri].g]=bit===0?remGames[ri].t1:remGames[ri].t2;
+    var totalScenarios=0;
+    function simBranch(simRES,idx){
+      var resolved=true;
+      while(resolved){resolved=false;for(var g=1;g<=63;g++){
+        if(simRES[g])continue;var nd=GT[g];
+        if(nd.t==="f"){}
+        else if(nd.t==="l"&&simRES[nd.f[0]]&&simRES[nd.f[1]]){}
+      }}
+      var nextG=-1;
+      for(var gi=0;gi<unresolved.length;gi++){
+        var gg=unresolved[gi];if(simRES[gg])continue;
+        var nd=GT[gg];if(nd.t==="f")continue;
+        if(nd.t==="l"&&simRES[nd.f[0]]&&simRES[nd.f[1]]){nextG=gg;break}
       }
-      var changed=true;
-      while(changed){changed=false;for(var g=1;g<=63;g++){if(simRES[g])continue;var nd=GT[g];if(nd.t==="l"&&simRES[nd.f[0]]&&simRES[nd.f[1]]){changed=false}}}
-      var scores=PP.map(function(p){
-        var pts=0;
-        for(var g=1;g<=63;g++){
-          var pk=p.p[g],ri2=GR[g],bp=RP[ri2],sd=TS[pk]||1;
-          var mpts=S.mode==="sb"?bp+sd:S.mode==="sm"?bp*sd:bp;
-          if(simRES[g]&&simRES[g]===pk)pts+=mpts;
-        }
-        return{n:p.n,pts:pts};
-      });
-      scores.sort(function(a,b){return b.pts-a.pts});
-      var topS=scores[0].pts;
-      var tiedCount=scores.filter(function(x){return x.pts===topS}).length;
-      scores.forEach(function(x){if(x.pts===topS)wins[x.n]+=1/tiedCount});
+      if(nextG===-1){
+        totalScenarios++;
+        var scores=PP.map(function(p){
+          var pts=0;
+          for(var g=1;g<=63;g++){
+            var pk=p.p[g],ri2=GR[g],bp=RP[ri2],sd=TS[pk]||1;
+            var mpts=S.mode==="sb"?bp+sd:S.mode==="sm"?bp*sd:bp;
+            if(simRES[g]&&simRES[g]===pk)pts+=mpts;
+          }
+          return{n:p.n,pts:pts};
+        });
+        scores.sort(function(a,b){return b.pts-a.pts});
+        var topS=scores[0].pts;
+        var tiedCount=scores.filter(function(x){return x.pts===topS}).length;
+        scores.forEach(function(x){if(x.pts===topS)wins[x.n]+=1/tiedCount});
+        return;
+      }
+      var nd=GT[nextG],t1=simRES[nd.f[0]],t2=simRES[nd.f[1]];
+      var sim1={};for(var k in simRES)sim1[k]=simRES[k];sim1[nextG]=t1;simBranch(sim1,idx+1);
+      var sim2={};for(var k in simRES)sim2[k]=simRES[k];sim2[nextG]=t2;simBranch(sim2,idx+1);
     }
+    var initRES={};for(var k in RES)initRES[k]=RES[k];
+    simBranch(initRES,0);
     h+='<div style="margin-top:12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:12px 16px">';
     h+='<div style="font-size:13px;font-weight:800;color:#1a1a2e;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Win Probability</div>';
-    var wpArr=[];PP.forEach(function(p){wpArr.push({n:p.n,w:wins[p.n],pct:Math.round(wins[p.n]/scenarios*1000)/10})});
+    var wpArr=[];PP.forEach(function(p){wpArr.push({n:p.n,w:wins[p.n],pct:Math.round(wins[p.n]/totalScenarios*1000)/10})});
     wpArr.sort(function(a,b){return b.pct-a.pct});
     wpArr.forEach(function(wp){
       var barCol=wp.pct>=30?"#16a34a":wp.pct>=10?"#2563eb":wp.pct>0?"#f59e0b":"#dc2626";
@@ -538,7 +551,7 @@ function upcomingGamesHTML(){
       h+='<span class="mono" style="font-size:12px;font-weight:700;color:'+barCol+';min-width:45px;text-align:right">'+wp.pct+'%</span>';
       h+='</div>';
     });
-    h+='<div style="font-size:9px;color:#9ca3af;margin-top:8px;text-align:center">Based on '+scenarios+' possible outcomes of '+remGames.length+' remaining game'+(remGames.length>1?"s":"")+'</div>';
+    h+='<div style="font-size:9px;color:#9ca3af;margin-top:8px;text-align:center">Based on '+totalScenarios+' possible outcomes of '+totalUn+' remaining game'+(totalUn>1?"s":"")+'</div>';
     h+='</div>';
   }
   return h;

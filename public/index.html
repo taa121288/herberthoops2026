@@ -643,9 +643,8 @@ function funStats(){
   Object.keys(TS).forEach(function(t){if(!el[t])aliveSeeds.push({t:t,s:TS[t]})});
   aliveSeeds.sort(function(a,b){return b.s-a.s});
   var bigUpset=aliveSeeds[0];
-  var canWin=window.WIN_PCT?ST.filter(function(s){return window.WIN_PCT[s.n]>0}).length:ST.filter(function(s){return s.mx>=leaderPts}).length;
-
   var h=upcomingGamesHTML();
+  var canWin=window.WIN_PCT?ST.filter(function(s){return window.WIN_PCT[s.n]>0}).length:ST.filter(function(s){return s.mx>=leaderPts}).length;
   h+='<div class="fun-stats">';
   h+='<div class="fun-card"><div class="fun-label">Tournament Progress</div><div class="fun-val">'+gamesPlayed+' / 63</div><div class="pbar"><div class="pbar-fill" style="width:'+pct+'%;background:#2563eb"></div></div><div class="gb"><span>'+pct+'% complete</span><span>'+gamesLeft+' games left</span></div></div>';
   h+='<div class="fun-card"><div class="fun-label">Can Still Win</div><div class="fun-val">'+canWin+' / '+PP.length+'</div><div class="fun-sub">players with max possible \u2265 leader</div></div>';
